@@ -1,4 +1,5 @@
 import mongoose, { Schema } from "mongoose";
+import bcrypt from "bcrypt";
 
 const userSchema = new Schema(
   {
@@ -60,6 +61,15 @@ const userSchema = new Schema(
     timestamps: true,
   },
 );
+
+userSchema.pre("save", async function (next) {
+  if (!this.isModified("password")) return next();
+  // modified is a function check which field are modified at save
+  this.password = await bcrypt.hash(this.password, 10);
+  next();
+});
+// if you create hook on "save" while in other field saving the data , assoicated function with hook run agian and agian.
+// we i have to create save guided function
 
 export const user = mongoose.model("User", userSchema);
 
